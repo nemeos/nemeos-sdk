@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "moduleResolution": "Classic",
+    "moduleResolution": "Node",
     "moduleDetection": "force",
     "target": "ES2022",
     "declaration": true,
