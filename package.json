@@ -20,7 +20,8 @@
     "build": "tsc"
   },
   "dependencies": {
-    "ethers": "^6.13.1"
+    "ethers": "^6.13.1",
+    "ofetch": "^1.3.4"
   },
   "devDependencies": {
     "typescript": "^5.5.3"

@@ -11,10 +11,6 @@
 
 Nemeos SDK to facilitate integration with the [Nemeos](nemeos.finance) platform.
 
-## Pre-requisites
-
-- [Node.js](https://nodejs.org/en/download/)
-
 ## Install
 
 ```bash
