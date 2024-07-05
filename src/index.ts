@@ -1,6 +1,7 @@
-import { ofetch } from 'ofetch'
 import * as ethers from 'ethers'
 import { NEMEOS_POOL_HUMAN_ABI } from './abi.js'
+import { assertValidHexAddress } from './utils.js'
+import { NemeosBackendClient } from './NemeosBackendClient.js'
 
 export type NftStartLoanData = {
   customerBuyNftParameters: {
@@ -63,41 +64,24 @@ export type NftStartLoanData = {
   }
 }
 
-const nemeosBackendHttpFetchClient = ofetch.create({
-  baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://api.nemeos.finance',
-})
-
-export class NemeosSDKError extends Error {
-  constructor(message: string, options?: ErrorOptions) {
-    super(message, options)
-    this.name = this.constructor.name
-    Object.setPrototypeOf(this, new.target.prototype)
-  }
-}
-
-const extractHttpErrorMessage = (error: any): string => error?.data?.message || error?.message || error?.data?.error
-const extractHttpErrorMessageThenThrow = (error: any) => {
-  throw new NemeosSDKError(extractHttpErrorMessage(error))
-}
-
-const assertValidHexAddress = (value: string) => {
-  if (!ethers.isAddress(value)) {
-    throw new NemeosSDKError(`The provided address is not a valid Ethereum address: "${value}".`)
-  }
-}
-
 export class NemeosSDK {
   constructor(private readonly signer: ethers.JsonRpcSigner) {}
 
-  public getPool(nemeosPoolAddress: string) {
-    return new NemeosPool(this.signer, nemeosPoolAddress)
+  public getPool(nftCollectionAddress: string, nemeosPoolAddress: string) {
+    return new NemeosPool(this.signer, nftCollectionAddress, nemeosPoolAddress)
   }
 }
 
 export class NemeosPool {
   private readonly poolContract: ethers.Contract
+  private readonly nemeosBackendClient = new NemeosBackendClient()
 
-  constructor(private readonly signer: ethers.JsonRpcSigner, private readonly nemeosPoolAddress: string) {
+  constructor(
+    private readonly signer: ethers.JsonRpcSigner,
+    private readonly nftCollectionAddress: string,
+    private readonly nemeosPoolAddress: string,
+  ) {
+    assertValidHexAddress(nftCollectionAddress)
     assertValidHexAddress(nemeosPoolAddress)
 
     const nemeosPoolInterface = new ethers.Interface(NEMEOS_POOL_HUMAN_ABI)
@@ -107,17 +91,31 @@ export class NemeosPool {
     console.log('this.poolContract', this.poolContract)
   }
 
-  public async startLoan(nftId: number, loanDurationDays: number) {
-    const startLoanData = await this.fetchStartLoanData(nftId, loanDurationDays)
-    console.log('startLoanData', startLoanData)
+  public async registerCustomerEmailAddress(customerEmailAddress: string) {
+    const borrowerAddress = await this.signer.getAddress()
+
+    console.log(`[nemeos-sdk][registerCustomerEmailAddress] Requesting wallet signature for borrowerAddress=${borrowerAddress}`)
+    const { message, signature } = await this.nemeosBackendClient.generateLoginSignature(this.signer)
+    console.log(
+      `[nemeos-sdk][registerCustomerEmailAddress] Registering customerEmailAddress=${customerEmailAddress} ` +
+        `for borrowerAddress=${borrowerAddress}`,
+    )
+    await this.nemeosBackendClient.setCustomerDataEmail(borrowerAddress, message, signature, customerEmailAddress)
   }
 
-  private async fetchStartLoanData(nftId: number, loanDurationDays: number): Promise<string> {
-    return nemeosBackendHttpFetchClient(`/nftCollections/${this.nemeosPoolAddress}/nftId/${nftId}/startLoanData`, {
-      query: {
-        loanDurationDays,
-        customerWalletAddress: await this.signer.getAddress(),
-      },
-    }).catch(extractHttpErrorMessageThenThrow)
+  public async startLoan(nftId: number, loanDurationDays: number) {
+    const borrowerAddress = await this.signer.getAddress()
+
+    console.log(
+      `[nemeos-sdk][startLoan] Starting loan from borrowerAddress=${borrowerAddress} for ` +
+        `nftCollectionAddress=${this.nftCollectionAddress}, nftId=${nftId}, loanDurationDays=${loanDurationDays}`,
+    )
+    const startLoanData = await this.nemeosBackendClient.fetchStartLoanData(
+      borrowerAddress,
+      this.nftCollectionAddress,
+      nftId,
+      loanDurationDays,
+    )
+    console.log('[nemeos-sdk][startLoan]', startLoanData)
   }
 }
