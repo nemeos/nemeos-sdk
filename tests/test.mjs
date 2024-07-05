@@ -1,5 +1,5 @@
 import * as ethers from 'ethers'
-import { NemeosSDK } from '../src/index.js'
+import { NemeosSDK } from '../dist/index.js'
 
 async function main() {
   if (!process.env.WALLET_PRIVATE_KEY || !process.env.INFURA_ENDPOINT_WITH_API_KEY) {

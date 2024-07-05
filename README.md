@@ -32,13 +32,9 @@ TODO
 ### Test script
 
 ```bash
-# Build with tsc
-pnpm build:tsc
-
-# Run the test script
-WALLET_PRIVATE_KEY=43ac571235456515454565645445454546123121454848791215488877897123 \
-INFURA_ENDPOINT_WITH_API_KEY=https://sepolia.infura.io/v3/b3866123121321321231212132131123 \
-node dist/tests/test.js
+export WALLET_PRIVATE_KEY=43ac571235456515454565645445454546123121454848791215488877897123
+export INFURA_ENDPOINT_WITH_API_KEY=https://sepolia.infura.io/v3/b3866123121321321231212132131123
+node tests/test.mjs
 ```
 
 ### Browser test page
@@ -46,7 +42,15 @@ node dist/tests/test.js
 Build the test page and the required dependencies with Parcel
 
 ```bash
-pnpm build:test-html
+pnpm i --global parcel
+```
+
+```bash
+# Using ethers.js
+parcel tests/testEthersJs.html
+
+# Using window.ethereum
+parcel tests/testWindowEthereum.html
 ```
 
 Then open a server, for example with [`serve`](https://github.com/vercel/serve)
