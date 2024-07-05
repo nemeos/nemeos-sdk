@@ -12,7 +12,7 @@ export class NemeosBackendClient {
     baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://api.nemeos.finance',
   })
 
-  public async generateLoginSignature(metamaskSigner: ethers.JsonRpcSigner) {
+  public async generateLoginSignature(metamaskSigner: ethers.Signer) {
     const message = `Action: check_ownership ; Date: ${new Date().toISOString()}`
     return {
       message,
@@ -43,12 +43,73 @@ export class NemeosBackendClient {
     nftCollectionAddress: string,
     nftId: number,
     loanDurationDays: number,
-  ): Promise<string> {
-    return this.ofetchClient(`/nftCollections/${nftCollectionAddress}/nftId/${nftId}/startLoanData`, {
+  ): Promise<NftStartLoanData> {
+    return this.ofetchClient<NftStartLoanData>(`/nftCollections/${nftCollectionAddress}/nftId/${nftId}/startLoanData`, {
       query: {
         loanDurationDays,
         customerWalletAddress: borrowerAddress,
       },
     }).catch(extractHttpErrorMessageThenThrow)
+  }
+}
+
+export type NftStartLoanData = {
+  customerBuyNftParameters: {
+    /** ID of the NFT */
+    tokenId: string
+    /**
+     * Price of the NFT on OpenSea in token units
+     *
+     * `openSeaNftPrice`
+     */
+    priceOfNFT: string
+    /**
+     * Floor price of the NFT given by Nemeos oracle algorithm in token units
+     *
+     * `nemeosOracleNftCollectionFloorPrice`
+     */
+    nftFloorPrice: string
+    /**
+     * Price of the NFT including the interest rate and protocol fees
+     *
+     * `totalLoanPrice`
+     *
+     * @example
+     * ```ts
+     * const totalLoanPrice = _remainingToPayPriceWithInterests.add(_proposedUpfrontPaymentGivenPrices)
+     * ```
+     */
+    priceOfNFTIncludingFees: string
+    /** Nemeos smart contracts seaport settlement manager address */
+    settlementManager: string
+    /**
+     * Timestamp of the loan
+     *
+     * @example
+     * ```ts
+     * const _blockNumber = await _metamaskSigner.provider.getBlockNumber()
+     * const _block = await _metamaskSigner.provider.getBlock(_blockNumber)
+     * const loanTimestamp = _block.timestamp
+     *```
+     */
+    loanTimestamp: number
+    /** Duration of the loan in seconds
+     *
+     * `loanDurationDays * 24 * 60 * 60`
+     */
+    loanDurationInSeconds: number
+    /** Extra data of the order */
+    orderExtraData: string
+    /** Signature of the oracle */
+    oracleSignature: string
+  }
+  customerBuyNftOverrides: {
+    /**
+     * Upfront payment of the loan that will be paid by the customer to the protocol smart contract
+     *
+     * `proposedUpfrontPaymentGivenPrices`
+     */
+    value: string
+    gasLimit: number
   }
 }
