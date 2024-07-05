@@ -2,8 +2,13 @@
   "name": "nemeos-sdk",
   "version": "0.1.0",
   "description": "Nemeos SDK to facilitate integration with the Nemeos platform",
-  "repository": "nemeos/nemeos-sdk",
   "license": "MIT",
+  "repository": "nemeos/nemeos-sdk",
+  "author": {
+    "name": "rigwild",
+    "email": "me@rigwild.dev",
+    "url": "https://rigwild.dev"
+  },
   "keywords": [
     "sdk",
     "blockchain",
@@ -15,6 +20,11 @@
   "main": "dist/index.js",
   "module": "dist/module.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "src",
+    "dist",
+    "pnpm-lock.yaml"
+  ],
   "engines": {
     "node": ">=14.0.0"
   },
@@ -22,7 +32,8 @@
     "build": "parcel build",
     "build:tsc": "tsc",
     "build:test-html": "parcel tests/test.html",
-    "clean": "rm -rf dist .parcel-cache"
+    "clean": "rm -rf dist .parcel-cache",
+    "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
     "ethers": "^6.13.1",
