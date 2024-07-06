@@ -31,6 +31,16 @@ pnpm install nemeos-sdk
 
 ### Initialize
 
+**Note:** This is a [pure ESM package](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c). If you are using CommonJS, you can use a bundler or import using dynamic `import()`.
+
+```js
+// ESM / TypeScript
+import { NemeosSDK } from 'nemeos-sdk'
+
+// CommonJS
+const { NemeosSDK } = await import('nemeos-sdk')
+```
+
 #### Node.js
 
 ```ts
