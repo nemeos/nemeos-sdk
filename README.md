@@ -74,6 +74,7 @@ import { NemeosSDK, getBrowserProvider } from 'nemeos-sdk'
 
 const provider = getBrowserProvider(window.ethereum)
 const signer = await provider.getSigner()
+
 const nemeosSdk = new NemeosSDK(signer)
 ```
 
