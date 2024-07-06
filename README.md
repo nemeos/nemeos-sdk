@@ -60,9 +60,11 @@ const nemeosSdk = new NemeosSDK(signer)
 ##### Using `window.ethereum`
 
 ```ts
-import { NemeosSDK } from 'nemeos-sdk'
+import { NemeosSDK, getBrowserProvider } from 'nemeos-sdk'
 
-const nemeosSdk = new NemeosSDK(window.ethereum)
+const provider = getBrowserProvider(window.ethereum)
+const signer = await provider.getSigner()
+const nemeosSdk = new NemeosSDK(signer)
 ```
 
 ### Pool methods

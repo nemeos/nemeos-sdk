@@ -10,6 +10,10 @@ const NEMEOS_POOL_HUMAN_ABI = [
   'function refundLoan(uint256 tokenId, address borrower) payable',
 ]
 
+export const getBrowserProvider = (windowEthereum: ethers.Eip1193Provider) => {
+  return new ethers.BrowserProvider(windowEthereum)
+}
+
 export class NemeosSDK {
   constructor(private readonly signer: ethers.Signer) {}
 
