@@ -1,6 +1,6 @@
 {
   "name": "nemeos-sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Nemeos SDK to facilitate integration with the Nemeos platform",
   "license": "MIT",
@@ -24,6 +24,7 @@
   "files": [
     "src",
     "dist",
+    "!**/*.tsbuildinfo",
     "pnpm-lock.yaml"
   ],
   "engines": {
@@ -31,7 +32,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist .parcel-cache",
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
