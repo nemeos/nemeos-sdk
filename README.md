@@ -1,15 +1,25 @@
+<div align="center">
+	<br>
+	<br>
+	<img width="360" src="logo_full_blue.png" alt="Nemeos logo" />
+	<br>
+	<br>
+
+Building new web3 economies.
+
+[![npm package](https://img.shields.io/npm/v/nemeos-sdk.svg?logo=npm)](https://www.npmjs.com/package/nemeos-sdk)
+[![npm downloads](https://img.shields.io/npm/dw/nemeos-sdk)](https://www.npmjs.com/package/nemeos-sdk)
+[![license](https://img.shields.io/npm/l/nemeos-sdk?color=blue)](./LICENSE)
+
+</div>
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="./logo_full_blue.png" width="200" alt="Nemeos Logo" /></a>
+  <a href="https://x.com/Nemeos_Finance" target="_blank"><img src="https://img.shields.io/twitter/follow/Nemeos_Finance.svg?style=social&label=@Nemeos_Finance"></a>
 </p>
 
-<p align="center">Building new web3 economies.</p>
-  <p align="center">
-<a href="https://twitter.com/Nemeos_Finance" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=@Nemeos_Finance"></a>
-</p>
+# Nemeos SDK
 
-# nemeos-sdk
-
-Nemeos SDK to facilitate integration with the [Nemeos](nemeos.finance) platform.
+Nemeos SDK to facilitate integration with the [Nemeos](https://nemeos.finance) platform.
 
 ## Install
 
@@ -17,15 +27,138 @@ Nemeos SDK to facilitate integration with the [Nemeos](nemeos.finance) platform.
 pnpm install nemeos-sdk
 ```
 
+## Usage
+
+### Initialize
+
+#### Node.js
+
+```ts
+import * as ethers from 'ethers'
+import { NemeosSDK } from 'nemeos-sdk'
+
+const provider = new ethers.JsonRpcProvider(process.env.INFURA_ENDPOINT_WITH_API_KEY)
+const wallet = new ethers.Wallet(process.env.WALLET_PRIVATE_KEY, provider)
+
+const nemeosSdk = new NemeosSDK(wallet)
+```
+
+#### Browser
+
+##### Using `ethers.js`
+
+```ts
+import * as ethers from 'ethers'
+import { NemeosSDK } from 'nemeos-sdk'
+
+const provider = new ethers.BrowserProvider(window.ethereum)
+const signer = await provider.getSigner()
+
+const nemeosSdk = new NemeosSDK(signer)
+```
+
+##### Using `window.ethereum`
+
+```ts
+import { NemeosSDK } from 'nemeos-sdk'
+
+const nemeosSdk = new NemeosSDK(window.ethereum)
+```
+
+### Pool methods
+
+#### Connect to a pool
+
+```ts
+const nemeosPool = nemeosSdk.getPool({
+  nemeosPoolAddress: '0x812db15b8Bb43dBA89042eA8b919740C23aD48a3',
+  nftCollectionAddress: '0x15cd1cfCd48C06cfC44D433D66C7a9fE06b2C2c3',
+})
+```
+
+#### Register a customer email address
+
+Register the wallet to an email address. The customer will be able to receive notifications and reminders about their loans.
+
+This call will trigger a signature request to the wallet. This is to ensure that the customer is the owner of the wallet.
+
+```ts
+const emailAddress = 'nemeos-sdk-example@yopmail.com'
+await nemeosPool.registerCustomerEmailAddress(emailAddress)
+```
+
+#### Start a loan
+
+```ts
+try {
+  const nftId = 224
+  const loanDurationDays = 90
+  const tx = await nemeosPool.startLoan(nftId, loanDurationDays)
+
+  console.log('Starting loan success! Transaction hash:', tx.hash)
+} catch (error) {
+  console.error('Starting loan failed!', error.message)
+  throw error
+}
+```
+
+#### Retrieve a loan
+
+```ts
+const nftId = 224
+const loan = await nemeosPool.retrieveLoan(nftId)
+```
+
+```ts
+type Loan = {
+  /** Borrower address */
+  borrower: string
+  /** Token ID */
+  tokenID: bigint
+  /** Amount owed with interest */
+  amountOwedWithInterest: bigint
+  /** Next payment amount */
+  nextPaymentAmount: bigint
+  /** Interest amount per payment */
+  interestAmountPerPayment: bigint
+  /** Loan duration in seconds */
+  loanDurationInSeconds: bigint
+  /** Start time */
+  startTime: bigint
+  /** Next payment time */
+  nextPaymentTime: bigint
+  /** Remaining number of installments */
+  remainingNumberOfInstallments: number
+  /** Daily interest rate at start */
+  dailyInterestRateAtStart: bigint
+  /** Is closed */
+  isClosed: boolean
+  /** Is in liquidation */
+  isInLiquidation: boolean
+}
+```
+
+#### Pay the next loan step
+
+```ts
+try {
+  const nftId = 224
+  const tx = await nemeosPool.payNextLoanStep(nftId)
+
+  console.log('Paying next loan step success! Transaction hash:', tx.hash)
+} catch (error) {
+  console.error('Paying next loan step failed!', error.message)
+  throw error
+}
+```
+
+---
+
 ## Build
 
 ```bash
 pnpm build
 ```
-
-## Usage
-
-TODO
 
 ## Tests
 
