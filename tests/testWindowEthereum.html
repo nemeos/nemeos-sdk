@@ -10,7 +10,7 @@
 
     <div>
       Is wallet connected?
-      <span id="isConnected">false</span>
+      <span id="isConnected">---</span>
     </div>
 
     <div>
@@ -27,8 +27,7 @@
     </div>
 
     <script type="module">
-      import * as ethers from 'ethers'
-      import { NemeosSDK } from '../src/index.ts'
+      import { NemeosSDK, getBrowserProvider } from '../src/index.ts'
 
       let signer
       let nemeosSdk
@@ -41,8 +40,8 @@
         if (!window.ethereum) return false
 
         try {
-          const _provider = new ethers.BrowserProvider(window.ethereum)
-          const accounts = await _provider.send('eth_accounts', [])
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+
           return accounts && accounts.length > 0
         } catch (error) {
           console.error('[isMetamaskConnected] There was an error while trying to connect to Metamask isMetamaskConnected()', { error })
@@ -50,15 +49,20 @@
         }
       }
 
-      async function connectWallet() {
-        const wallet = new ethers.BrowserProvider(window.ethereum)
-        signer = await wallet.getSigner()
+      function setWalletConnected(bool) {
+        document.getElementById('isConnected').innerText = bool
+      }
 
+      async function connectWallet() {
+        const provider = getBrowserProvider(window.ethereum)
+        const signer = await provider.getSigner()
         nemeosSdk = new NemeosSDK(signer)
         nemeosPool = nemeosSdk.getPool({
           nemeosPoolAddress,
           nftCollectionAddress: cyberKongzAddress,
         })
+
+        setWalletConnected(true)
       }
 
       async function startLoan() {
@@ -81,8 +85,10 @@
       document.addEventListener('DOMContentLoaded', async () => {
         addEventListeners()
         if (await isMetamaskConnected()) {
-          document.getElementById('isConnected').innerText = 'true'
+          setWalletConnected(true)
           connectWallet()
+        } else {
+          setWalletConnected(false)
         }
       })
     </script>
