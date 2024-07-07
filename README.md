@@ -29,8 +29,6 @@ pnpm install nemeos-sdk
 
 ## Usage
 
-### Initialize
-
 **Note:** This is a [pure ESM package](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c). If you are using CommonJS, you can use a bundler or import using dynamic `import()`.
 
 ```js
@@ -40,6 +38,8 @@ import { NemeosSDK } from 'nemeos-sdk'
 // CommonJS
 const { NemeosSDK } = await import('nemeos-sdk')
 ```
+
+### Initialize SDK
 
 #### Node.js
 
@@ -78,26 +78,54 @@ const signer = await provider.getSigner()
 const nemeosSdk = new NemeosSDK(signer)
 ```
 
-### Pool methods
+### Nemeos Customer Client
 
-#### Connect to a pool
+The Nemeos Customer Client is used to interact with the Nemeos backend to manage customer data.
 
 ```ts
-const nemeosPool = nemeosSdk.getPool({
-  nemeosPoolAddress: '0x812db15b8Bb43dBA89042eA8b919740C23aD48a3',
-  nftCollectionAddress: '0x15cd1cfCd48C06cfC44D433D66C7a9fE06b2C2c3',
-})
+const nemeosCustomerClient = nemeosSdk.getNemeosCustomerClient()
 ```
 
-#### Register a customer email address
+#### Generate login signature
 
-Register the wallet to an email address. The customer will be able to receive notifications and reminders about their loans.
+Trigger a signature request to the wallet. This signature is used to ensure that the customer is the owner of the wallet when interacting with the Nemeos backend.
 
-This call will trigger a signature request to the wallet. This is to ensure that the customer is the owner of the wallet.
+The signature is valid for a few days.
+
+```ts
+const loginSignature = await nemeosCustomerClient.requestLoginSignature()
+```
+
+#### Register email
+
+Register the wallet to an email address. This is used to send email notifications and reminders to customers about their loans.
+
+The email address will not be broadcasted on the blockchain. It is only stored in Nemeos backend database.
 
 ```ts
 const emailAddress = 'nemeos-sdk-example@yopmail.com'
-await nemeosPool.registerCustomerEmailAddress(emailAddress)
+await nemeosCustomerClient.registerEmail(loginSignature, emailAddress)
+```
+
+### Unregister email
+
+Unregister the wallet from its associated email address. The customer will no longer receive email notifications and reminders.
+
+This will remove the email address from the Nemeos backend database.
+
+```ts
+await nemeosCustomerClient.unregisterEmail(loginSignature)
+```
+
+### Nemeos Pool Client
+
+The Nemeos Pool Client is used to interact with Nemeos pools smart contracts on the blockchain.
+
+```ts
+const nemeosPoolClient = nemeosSdk.getNemeosPoolClient({
+  nemeosPoolAddress: '0x812db15b8Bb43dBA89042eA8b919740C23aD48a3',
+  nftCollectionAddress: '0x15cd1cfCd48C06cfC44D433D66C7a9fE06b2C2c3',
+})
 ```
 
 #### Start a loan
@@ -106,7 +134,7 @@ await nemeosPool.registerCustomerEmailAddress(emailAddress)
 try {
   const nftId = 224
   const loanDurationDays = 90
-  const tx = await nemeosPool.startLoan(nftId, loanDurationDays)
+  const tx = await nemeosPoolClient.startLoan(nftId, loanDurationDays)
 
   console.log('Starting loan success! Transaction hash:', tx.hash)
 } catch (error) {
@@ -119,7 +147,7 @@ try {
 
 ```ts
 const nftId = 224
-const loan = await nemeosPool.retrieveLoan(nftId)
+const loan = await nemeosPoolClient.retrieveLoan(nftId)
 ```
 
 ```ts
@@ -156,7 +184,7 @@ type Loan = {
 ```ts
 try {
   const nftId = 224
-  const tx = await nemeosPool.payNextLoanStep(nftId)
+  const tx = await nemeosPoolClient.payNextLoanStep(nftId)
 
   console.log('Paying next loan step success! Transaction hash:', tx.hash)
 } catch (error) {
@@ -178,6 +206,7 @@ pnpm build
 ### Test script
 
 ```bash
+export NODE_ENV=development # to connect to Nemeos backend at http://localhost:3000
 export WALLET_PRIVATE_KEY=43ac571235456515454565645445454546123121454848791215488877897123
 export INFURA_ENDPOINT_WITH_API_KEY=https://sepolia.infura.io/v3/b3866123121321321231212132131123
 node tests/test.mjs

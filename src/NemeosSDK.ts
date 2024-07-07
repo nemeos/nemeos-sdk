@@ -33,8 +33,10 @@ class NemeosCustomerClient {
   constructor(private readonly signer: ethers.Signer) {}
 
   /**
-   * Trigger a signature request to the wallet. This is to ensure that the customer is the owner of the wallet when
+   * Trigger a signature request to the wallet. This signature is used to ensure that the customer is the owner of the wallet when
    * interacting with the Nemeos backend.
+   *
+   * The signature is valid for a few days.
    */
   public async requestLoginSignature(): Promise<NemeosLoginSignature> {
     const borrowerAddress = await this.signer.getAddress()
