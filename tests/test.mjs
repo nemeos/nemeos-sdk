@@ -28,8 +28,16 @@ async function main() {
 
   const loginSignature = await nemeosCustomerClient.requestLoginSignature()
   console.log('loginSignature:', loginSignature)
+
+  await nemeosCustomerClient.unregisterEmail(loginSignature)
+
+  const customerDataBeforeEmailRegistration = await nemeosCustomerClient.fetchCustomerData(loginSignature)
+  console.log('customerData before email registration:', customerDataBeforeEmailRegistration)
+
   await nemeosCustomerClient.registerEmail(loginSignature, 'nemeos.hello.testing1234@yopmail.com')
-  // await nemeosCustomerClient.unregisterEmail(loginSignature)
+
+  const customerDataAfterEmailRegistration = await nemeosCustomerClient.fetchCustomerData(loginSignature)
+  console.log('customerData after email registration:', customerDataAfterEmailRegistration)
 
   //
   // NemeosPoolClient

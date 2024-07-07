@@ -96,6 +96,14 @@ The signature is valid for a few days.
 const loginSignature = await nemeosCustomerClient.requestLoginSignature()
 ```
 
+### Fetch customer data
+
+Fetch the customer data associated with the wallet address.
+
+```ts
+const customerData = await nemeosCustomerClient.fetchCustomerData(loginSignature)
+```
+
 #### Register email
 
 Register the wallet to an email address. This is used to send email notifications and reminders to customers about their loans.

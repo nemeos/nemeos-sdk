@@ -20,6 +20,15 @@ export class NemeosBackendClient {
     }
   }
 
+  public static async fetchCustomerData(borrowerAddress: string, loginSignature: NemeosLoginSignature): Promise<CustomerData> {
+    return NemeosBackendClient.ofetchClient(`/customerData/${borrowerAddress}`, {
+      headers: {
+        'X-Login-Signed-Message': loginSignature.message,
+        'X-Login-Signed-Signature': loginSignature.signature,
+      },
+    }).catch(extractHttpErrorMessageThenThrow)
+  }
+
   public static async setCustomerDataEmail(borrowerAddress: string, loginSignature: NemeosLoginSignature, email: string): Promise<void> {
     return NemeosBackendClient.ofetchClient(`/customerData/${borrowerAddress}/email`, {
       method: 'PUT',
@@ -64,6 +73,14 @@ export class NemeosBackendClient {
 export type NemeosLoginSignature = {
   message: string
   signature: string
+}
+
+export type CustomerData = {
+  /** Borrower address */
+  borrower: string
+
+  email?: string
+  web3EmailProtectedData?: string
 }
 
 export type NftStartLoanData = {

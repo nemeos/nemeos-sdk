@@ -1,5 +1,5 @@
 import * as ethers from 'ethers'
-import { NemeosBackendClient, NemeosLoginSignature } from './NemeosBackendClient.js'
+import { NemeosBackendClient, NemeosLoginSignature, CustomerData } from './NemeosBackendClient.js'
 import { assertValidHexAddress, NemeosSDKError } from './utils.js'
 
 const NEMEOS_POOL_HUMAN_ABI = [
@@ -40,8 +40,21 @@ class NemeosCustomerClient {
    */
   public async requestLoginSignature(): Promise<NemeosLoginSignature> {
     const borrowerAddress = await this.signer.getAddress()
+
     console.log(`[nemeos][generateLoginSignature] Requesting wallet signature for borrowerAddress=${borrowerAddress}`)
     return NemeosBackendClient.generateLoginSignature(this.signer)
+  }
+
+  /**
+   * Fetch the customer data associated with the wallet address.
+   *
+   * @param loginSignature Signature to ensure that the customer is the owner of the wallet
+   */
+  public async fetchCustomerData(loginSignature: NemeosLoginSignature): Promise<CustomerData> {
+    const borrowerAddress = await this.signer.getAddress()
+
+    console.log(`[nemeos][fetchCustomerData] Fetching customer data for borrowerAddress=${borrowerAddress}`)
+    return NemeosBackendClient.fetchCustomerData(borrowerAddress, loginSignature)
   }
 
   /**
@@ -66,6 +79,8 @@ class NemeosCustomerClient {
    * Unregister the wallet from its associated email address. The customer will no longer receive email notifications and reminders.
    *
    * This will remove the email address from the Nemeos backend database.
+   *
+   * @param loginSignature Signature to ensure that the customer is the owner of the wallet
    */
   public async unregisterEmail(loginSignature: NemeosLoginSignature): Promise<void> {
     const borrowerAddress = await this.signer.getAddress()
