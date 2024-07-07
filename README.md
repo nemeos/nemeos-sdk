@@ -102,7 +102,7 @@ The signature is valid for a few days.
 const loginSignature = await nemeosCustomerClient.requestLoginSignature()
 ```
 
-### Fetch customer data
+#### Fetch customer data
 
 Fetch the customer data associated with the wallet address.
 
@@ -121,7 +121,7 @@ const emailAddress = 'nemeos-sdk-example@yopmail.com'
 await nemeosCustomerClient.registerEmail(loginSignature, emailAddress)
 ```
 
-### Unregister email
+#### Unregister email
 
 Unregister the wallet from its associated email address. The customer will no longer receive email notifications and reminders.
 
