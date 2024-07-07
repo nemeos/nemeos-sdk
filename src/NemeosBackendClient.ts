@@ -8,11 +8,11 @@ const extractHttpErrorMessageThenThrow = (error: any) => {
 }
 
 export class NemeosBackendClient {
-  private ofetchClient = ofetch.create({
+  private static readonly ofetchClient = ofetch.create({
     baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://api.nemeos.finance',
   })
 
-  public async generateLoginSignature(metamaskSigner: ethers.Signer) {
+  public static async generateLoginSignature(metamaskSigner: ethers.Signer): Promise<NemeosLoginSignature> {
     const message = `Action: check_ownership ; Date: ${new Date().toISOString()}`
     return {
       message,
@@ -20,17 +20,12 @@ export class NemeosBackendClient {
     }
   }
 
-  public async setCustomerDataEmail(
-    borrowerAddress: string,
-    loginSignedMessage: string,
-    loginSignature: string,
-    email: string,
-  ): Promise<void> {
-    return this.ofetchClient(`/customerData/${borrowerAddress}/email`, {
+  public static async setCustomerDataEmail(borrowerAddress: string, loginSignature: NemeosLoginSignature, email: string): Promise<void> {
+    return NemeosBackendClient.ofetchClient(`/customerData/${borrowerAddress}/email`, {
       method: 'PUT',
       headers: {
-        'X-Login-Signed-Message': loginSignedMessage,
-        'X-Login-Signed-Signature': loginSignature,
+        'X-Login-Signed-Message': loginSignature.message,
+        'X-Login-Signed-Signature': loginSignature.signature,
       },
       body: {
         email,
@@ -38,19 +33,37 @@ export class NemeosBackendClient {
     }).catch(extractHttpErrorMessageThenThrow)
   }
 
-  public async fetchStartLoanData(
+  public static async deleteCustomerDataEmail(borrowerAddress: string, loginSignature: NemeosLoginSignature): Promise<void> {
+    return NemeosBackendClient.ofetchClient(`/customerData/${borrowerAddress}/email`, {
+      method: 'DELETE',
+      headers: {
+        'X-Login-Signed-Message': loginSignature.message,
+        'X-Login-Signed-Signature': loginSignature.signature,
+      },
+    }).catch(extractHttpErrorMessageThenThrow)
+  }
+
+  public static async fetchStartLoanData(
     borrowerAddress: string,
     nftCollectionAddress: string,
     nftId: number,
     loanDurationDays: number,
   ): Promise<NftStartLoanData> {
-    return this.ofetchClient<NftStartLoanData>(`/nftCollections/${nftCollectionAddress}/nftId/${nftId}/startLoanData`, {
+    return NemeosBackendClient.ofetchClient<NftStartLoanData>(`/nftCollections/${nftCollectionAddress}/nftId/${nftId}/startLoanData`, {
       query: {
         loanDurationDays,
         customerWalletAddress: borrowerAddress,
       },
     }).catch(extractHttpErrorMessageThenThrow)
   }
+}
+
+/**
+ * Wallet signature to ensure that the customer is the owner of the wallet. This signature is valid for a few days.
+ */
+export type NemeosLoginSignature = {
+  message: string
+  signature: string
 }
 
 export type NftStartLoanData = {

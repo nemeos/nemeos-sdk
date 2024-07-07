@@ -31,7 +31,7 @@
 
       let signer
       let nemeosSdk
-      let nemeosPool
+      let nemeosPoolClient
 
       const nemeosPoolAddress = '0x812db15b8Bb43dBA89042eA8b919740C23aD48a3'
       const cyberKongzAddress = '0x15cd1cfCd48C06cfC44D433D66C7a9fE06b2C2c3'
@@ -57,7 +57,7 @@
         const provider = getBrowserProvider(window.ethereum)
         const signer = await provider.getSigner()
         nemeosSdk = new NemeosSDK(signer)
-        nemeosPool = nemeosSdk.getPool({
+        nemeosPoolClient = nemeosSdk.getNemeosPoolClient({
           nemeosPoolAddress,
           nftCollectionAddress: cyberKongzAddress,
         })
@@ -66,13 +66,13 @@
       }
 
       async function startLoan() {
-        await nemeosPool.startLoan(224, 90)
+        await nemeosPoolClient.startLoan(224, 90)
       }
       async function retrieveLoan() {
-        await nemeosPool.retrieveLoan(224)
+        await nemeosPoolClient.retrieveLoan(224)
       }
       async function payNextLoanStep() {
-        await nemeosPool.payNextLoanStep(224)
+        await nemeosPoolClient.payNextLoanStep(224)
       }
 
       function addEventListeners() {
