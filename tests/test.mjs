@@ -19,6 +19,7 @@ async function main() {
   const wallet = new ethers.Wallet(process.env.WALLET_PRIVATE_KEY, provider)
 
   const nemeosSdk = new NemeosSDK(wallet)
+  // const nemeosSdk = new NemeosSDK(wallet, { enableLogging: true })
 
   //
   // NemeosCustomerClient

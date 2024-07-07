@@ -15,22 +15,32 @@ export const getBrowserProvider = (windowEthereum: ethers.Eip1193Provider) => {
 }
 
 export class NemeosSDK {
-  constructor(private readonly signer: ethers.Signer) {}
+  private readonly enableLogging: boolean
+
+  constructor(
+    private readonly signer: ethers.Signer,
+    options?: {
+      /** Enable logging to the console - Optional, default: `true` */
+      enableLogging?: boolean
+    },
+  ) {
+    this.enableLogging = options?.enableLogging === undefined ? true : options.enableLogging
+  }
 
   public getNemeosCustomerClient(): NemeosCustomerClient {
-    return new NemeosCustomerClient(this.signer)
+    return new NemeosCustomerClient(this.signer, this.enableLogging)
   }
 
   public getNemeosPoolClient(params: { nftCollectionAddress: string; nemeosPoolAddress: string }): NemeosPoolClient {
     const { nftCollectionAddress, nemeosPoolAddress } = params
     assertValidHexAddress(nftCollectionAddress)
     assertValidHexAddress(nemeosPoolAddress)
-    return new NemeosPoolClient(this.signer, nftCollectionAddress, nemeosPoolAddress)
+    return new NemeosPoolClient(this.signer, this.enableLogging, nftCollectionAddress, nemeosPoolAddress)
   }
 }
 
 class NemeosCustomerClient {
-  constructor(private readonly signer: ethers.Signer) {}
+  constructor(private readonly signer: ethers.Signer, private readonly enableLogging: boolean) {}
 
   /**
    * Trigger a signature request to the wallet. This signature is used to ensure that the customer is the owner of the wallet when
@@ -41,7 +51,9 @@ class NemeosCustomerClient {
   public async requestLoginSignature(): Promise<NemeosLoginSignature> {
     const borrowerAddress = await this.signer.getAddress()
 
-    console.log(`[nemeos][generateLoginSignature] Requesting wallet signature for borrowerAddress=${borrowerAddress}`)
+    if (this.enableLogging) {
+      console.log(`[nemeos][generateLoginSignature] Requesting wallet signature for borrowerAddress=${borrowerAddress}`)
+    }
     return NemeosBackendClient.generateLoginSignature(this.signer)
   }
 
@@ -53,7 +65,9 @@ class NemeosCustomerClient {
   public async fetchCustomerData(loginSignature: NemeosLoginSignature): Promise<CustomerData> {
     const borrowerAddress = await this.signer.getAddress()
 
-    console.log(`[nemeos][fetchCustomerData] Fetching customer data for borrowerAddress=${borrowerAddress}`)
+    if (this.enableLogging) {
+      console.log(`[nemeos][fetchCustomerData] Fetching customer data for borrowerAddress=${borrowerAddress}`)
+    }
     return NemeosBackendClient.fetchCustomerData(borrowerAddress, loginSignature)
   }
 
@@ -68,11 +82,15 @@ class NemeosCustomerClient {
   public async registerEmail(loginSignature: NemeosLoginSignature, customerEmail: string): Promise<void> {
     const borrowerAddress = await this.signer.getAddress()
 
-    console.log(`[nemeos][registerEmail] Registering customerEmail=${customerEmail} for borrowerAddress=${borrowerAddress}...`)
+    if (this.enableLogging) {
+      console.log(`[nemeos][registerEmail] Registering customerEmail=${customerEmail} for borrowerAddress=${borrowerAddress}...`)
+    }
     await NemeosBackendClient.setCustomerDataEmail(borrowerAddress, loginSignature, customerEmail)
-    console.log(
-      `[nemeos][registerEmail] Successfully registered customerEmail=${customerEmail} ` + `for borrowerAddress=${borrowerAddress}!`,
-    )
+    if (this.enableLogging) {
+      console.log(
+        `[nemeos][registerEmail] Successfully registered customerEmail=${customerEmail} ` + `for borrowerAddress=${borrowerAddress}!`,
+      )
+    }
   }
 
   /**
@@ -85,9 +103,13 @@ class NemeosCustomerClient {
   public async unregisterEmail(loginSignature: NemeosLoginSignature): Promise<void> {
     const borrowerAddress = await this.signer.getAddress()
 
-    console.log(`[nemeos][unregisterEmail] Unregistering email for borrowerAddress=${borrowerAddress}...`)
+    if (this.enableLogging) {
+      console.log(`[nemeos][unregisterEmail] Unregistering email for borrowerAddress=${borrowerAddress}...`)
+    }
     await NemeosBackendClient.deleteCustomerDataEmail(borrowerAddress, loginSignature)
-    console.log(`[nemeos][unregisterEmail] Successfully unregistered email for borrowerAddress=${borrowerAddress}!`)
+    if (this.enableLogging) {
+      console.log(`[nemeos][unregisterEmail] Successfully unregistered email for borrowerAddress=${borrowerAddress}!`)
+    }
   }
 }
 
@@ -96,6 +118,7 @@ class NemeosPoolClient {
 
   constructor(
     private readonly signer: ethers.Signer,
+    private readonly enableLogging: boolean,
     private readonly nftCollectionAddress: string,
     private readonly nemeosPoolAddress: string,
   ) {
@@ -106,15 +129,19 @@ class NemeosPoolClient {
   public async startLoan(nftId: number, loanDurationDays: number): Promise<ethers.ContractTransactionReceipt> {
     const borrowerAddress = await this.signer.getAddress()
 
-    console.log(
-      `[nemeos][startLoan] Starting loan from borrowerAddress=${borrowerAddress} for ` +
-        `nftCollectionAddress=${this.nftCollectionAddress}, nftId=${nftId}, loanDurationDays=${loanDurationDays}`,
-    )
+    if (this.enableLogging) {
+      console.log(
+        `[nemeos][startLoan] Starting loan from borrowerAddress=${borrowerAddress} for ` +
+          `nftCollectionAddress=${this.nftCollectionAddress}, nftId=${nftId}, loanDurationDays=${loanDurationDays}`,
+      )
+    }
 
     const startLoanData = await NemeosBackendClient.fetchStartLoanData(borrowerAddress, this.nftCollectionAddress, nftId, loanDurationDays)
     const feeOverides = await this.getFeeOverrides()
 
-    console.log('[nemeos][startLoan] Call Pool.buyNFT() with startLoanData=', startLoanData, ', feeOverides=', feeOverides)
+    if (this.enableLogging) {
+      console.log('[nemeos][startLoan] Call Pool.buyNFT() with startLoanData=', startLoanData, ', feeOverides=', feeOverides)
+    }
     const tx: ethers.ContractTransactionResponse = await this.poolContract.buyNFT(
       startLoanData.customerBuyNftParameters.tokenId,
       startLoanData.customerBuyNftParameters.priceOfNFT,
@@ -137,33 +164,43 @@ class NemeosPoolClient {
       console.error('[nemeos][startLoan] Transaction failed! Tx receipt', receipt)
       throw new NemeosSDKError('Pool.buyNFT() Transaction failed!')
     }
-    console.log('[nemeos][startLoan] Transaction successful! Tx receipt', receipt)
+    if (this.enableLogging) {
+      console.log('[nemeos][startLoan] Transaction successful! Tx receipt', receipt)
+    }
     return receipt
   }
 
   public async retrieveLoan(nftId: number): Promise<Loan> {
     const borrowerAddress = await this.signer.getAddress()
 
-    console.log(`[nemeos][retrieveLoan] Call Pool.retrieveLoan() with nftId=${nftId}, borrowerAddress=${borrowerAddress}`)
+    if (this.enableLogging) {
+      console.log(`[nemeos][retrieveLoan] Call Pool.retrieveLoan() with nftId=${nftId}, borrowerAddress=${borrowerAddress}`)
+    }
     const loan: Loan = loanProxyToObjectMapper(await this.poolContract.retrieveLoan(nftId, borrowerAddress))
-    console.log('[nemeos][retrieveLoan] Retrieved loan data from contract, loan=', loan)
+    if (this.enableLogging) {
+      console.log('[nemeos][retrieveLoan] Retrieved loan data from contract, loan=', loan)
+    }
     return loan
   }
 
   public async payNextLoanStep(nftId: number): Promise<ethers.ContractTransactionReceipt> {
     const borrowerAddress = await this.signer.getAddress()
 
-    console.log(
-      `[nemeos][payNextLoanStep] Paying next loan step from borrowerAddress=${borrowerAddress} for ` +
-        `nftCollectionAddress=${this.nftCollectionAddress}, nftId=${nftId}`,
-    )
+    if (this.enableLogging) {
+      console.log(
+        `[nemeos][payNextLoanStep] Paying next loan step from borrowerAddress=${borrowerAddress} for ` +
+          `nftCollectionAddress=${this.nftCollectionAddress}, nftId=${nftId}`,
+      )
+    }
 
     const loan = await this.retrieveLoan(nftId)
 
-    console.log(
-      `[nemeos][payNextLoanStep] Call Pool.refundLoan() with nftId=${nftId}, borrowerAddress=${borrowerAddress}, ` +
-        `loan.nextPaymentAmount=${loan.nextPaymentAmount.toString()}`,
-    )
+    if (this.enableLogging) {
+      console.log(
+        `[nemeos][payNextLoanStep] Call Pool.refundLoan() with nftId=${nftId}, borrowerAddress=${borrowerAddress}, ` +
+          `loan.nextPaymentAmount=${loan.nextPaymentAmount.toString()}`,
+      )
+    }
     const tx: ethers.ContractTransactionResponse = await this.poolContract.refundLoan(nftId, borrowerAddress, {
       value: loan.nextPaymentAmount.toString(),
     })
@@ -173,7 +210,9 @@ class NemeosPoolClient {
       console.error('[nemeos][payNextLoanStep] Transaction failed! Tx receipt', receipt)
       throw new NemeosSDKError('Pool.refundLoan() Transaction failed!')
     }
-    console.log('[nemeos][payNextLoanStep] Transaction successful! Tx receipt', receipt)
+    if (this.enableLogging) {
+      console.log('[nemeos][payNextLoanStep] Transaction successful! Tx receipt', receipt)
+    }
     return receipt
   }
 

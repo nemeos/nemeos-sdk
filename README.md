@@ -50,7 +50,9 @@ import { NemeosSDK } from 'nemeos-sdk'
 const provider = new ethers.JsonRpcProvider(process.env.INFURA_ENDPOINT_WITH_API_KEY)
 const wallet = new ethers.Wallet(process.env.WALLET_PRIVATE_KEY, provider)
 
-const nemeosSdk = new NemeosSDK(wallet)
+const nemeosSdk = new NemeosSDK(wallet, {
+  enableLogging: true, // Enable logging to the console - Optional, default: `true`
+})
 ```
 
 #### Browser
@@ -64,7 +66,9 @@ import { NemeosSDK } from 'nemeos-sdk'
 const provider = new ethers.BrowserProvider(window.ethereum)
 const signer = await provider.getSigner()
 
-const nemeosSdk = new NemeosSDK(signer)
+const nemeosSdk = new NemeosSDK(signer, {
+  enableLogging: true, // Enable logging to the console - Optional, default: `true`
+})
 ```
 
 ##### Using `window.ethereum`
@@ -75,7 +79,9 @@ import { NemeosSDK, getBrowserProvider } from 'nemeos-sdk'
 const provider = getBrowserProvider(window.ethereum)
 const signer = await provider.getSigner()
 
-const nemeosSdk = new NemeosSDK(signer)
+const nemeosSdk = new NemeosSDK(signer, {
+  enableLogging: true, // Enable logging to the console - Optional, default: `true`
+})
 ```
 
 ### Nemeos Customer Client
