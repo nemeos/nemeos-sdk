@@ -52,18 +52,21 @@ export class NemeosBackendClient {
     }).catch(extractHttpErrorMessageThenThrow)
   }
 
-  public static async fetchStartLoanData(
+  public static async fetchStartLoanBuyOpenSeaData(
     borrowerAddress: string,
     nftCollectionAddress: string,
     nftId: number,
     loanDurationDays: number,
-  ): Promise<NftStartLoanData> {
-    return NemeosBackendClient.ofetchClient<NftStartLoanData>(`/nftCollections/${nftCollectionAddress}/nftId/${nftId}/startLoanData`, {
-      query: {
-        loanDurationDays,
-        customerWalletAddress: borrowerAddress,
+  ): Promise<NftStartLoanBuyOpenSeaData> {
+    return NemeosBackendClient.ofetchClient<NftStartLoanBuyOpenSeaData>(
+      `/nftCollections/${nftCollectionAddress}/protocolVariant/buyOpenSea/nftId/${nftId}/startLoanData`,
+      {
+        query: {
+          loanDurationDays,
+          customerWalletAddress: borrowerAddress,
+        },
       },
-    }).catch(extractHttpErrorMessageThenThrow)
+    ).catch(extractHttpErrorMessageThenThrow)
   }
 }
 
@@ -83,7 +86,7 @@ export type CustomerData = {
   web3EmailProtectedData?: string
 }
 
-export type NftStartLoanData = {
+export type NftStartLoanBuyOpenSeaData = {
   customerBuyNftParameters: {
     /** ID of the NFT */
     tokenId: string

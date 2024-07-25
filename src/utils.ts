@@ -13,3 +13,11 @@ export class NemeosSDKError extends Error {
     Object.setPrototypeOf(this, new.target.prototype)
   }
 }
+
+export async function getFeeOverrides(provider: ethers.Provider) {
+  const feeData = await provider!.getFeeData()
+  const isLegacyNetwork = feeData.maxFeePerGas === undefined || feeData.maxPriorityFeePerGas === undefined
+  return isLegacyNetwork
+    ? { gasPrice: feeData.gasPrice }
+    : { maxFeePerGas: feeData.maxFeePerGas, maxPriorityFeePerGas: feeData.maxPriorityFeePerGas }
+}
