@@ -9,7 +9,12 @@ const extractHttpErrorMessageThenThrow = (error: any) => {
 
 export class NemeosBackendClient {
   private static readonly ofetchClient = ofetch.create({
-    baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://api.nemeos.finance',
+    baseURL:
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:8000'
+        : process.env.NODE_ENV === 'preprod'
+        ? 'https://testnet-api.nemeos.finance'
+        : 'https://api.nemeos.finance',
   })
 
   public static async generateLoginSignature(metamaskSigner: ethers.Signer): Promise<NemeosLoginSignature> {
@@ -52,6 +57,24 @@ export class NemeosBackendClient {
     }).catch(extractHttpErrorMessageThenThrow)
   }
 
+  //
+  // Nemeos Pool BuyOpenSea mode
+  //
+  public static async fetchLivePriceBuyOpenSeaData(
+    nftCollectionAddress: string,
+    nftId: number,
+    loanDurationDays: number,
+  ): Promise<NftLivePriceBuyOpenSeaData> {
+    return NemeosBackendClient.ofetchClient<NftLivePriceBuyOpenSeaData>(
+      `/nftCollections/${nftCollectionAddress}/protocolVariant/buyOpenSea/nftId/${nftId}/livePriceData`,
+      {
+        query: {
+          loanDurationDays,
+        },
+      },
+    ).catch(extractHttpErrorMessageThenThrow)
+  }
+
   public static async fetchStartLoanBuyOpenSeaData(
     borrowerAddress: string,
     nftCollectionAddress: string,
@@ -69,15 +92,32 @@ export class NemeosBackendClient {
     ).catch(extractHttpErrorMessageThenThrow)
   }
 
+  //
+  // Nemeos Pool DirectMint mode
+  //
+
+  public static async fetchLivePriceDirectMintData(
+    nftCollectionAddress: string,
+    loanDurationDays: number,
+  ): Promise<NftLivePriceDirectMintData> {
+    return NemeosBackendClient.ofetchClient<NftLivePriceDirectMintData>(
+      `/nftCollections/${nftCollectionAddress}/protocolVariant/directMint/livePriceData`,
+      {
+        query: {
+          loanDurationDays,
+        },
+      },
+    ).catch(extractHttpErrorMessageThenThrow)
+  }
+
   public static async fetchStartLoanDirectMintData(
     borrowerAddress: string,
     nftCollectionAddress: string,
-    nftId: number,
     loanDurationDays: number,
     whitelistProof?: string[],
   ): Promise<NftStartLoanDirectMintData> {
     return NemeosBackendClient.ofetchClient<NftStartLoanDirectMintData>(
-      `/nftCollections/${nftCollectionAddress}/protocolVariant/directMint/nftId/${nftId}/startLoanData`,
+      `/nftCollections/${nftCollectionAddress}/protocolVariant/directMint/startLoanData`,
       {
         query: {
           loanDurationDays,
@@ -103,6 +143,149 @@ export type CustomerData = {
 
   email?: string
   web3EmailProtectedData?: string
+}
+
+//
+// Nemeos Pool BuyOpenSea mode
+//
+
+export type NftLivePriceBuyOpenSeaData = {
+  nftFullLivePriceData: {
+    /** @example "231" */
+    nftId: string
+    /** @example "4000000000000000000" */
+    openSeaNftPrice: string
+    /** @example "4" */
+    openSeaNftPriceHuman: string
+    /** @example "4" */
+    openSeaNftPriceHumanShortRound: string
+    /** @example "12686.2" */
+    openSeaNftPriceHumanUSD: string
+    /** @example "160000000000000003" */
+    nemeosOracleNftCollectionFloorPrice: string
+    /** @example "0.16" */
+    nemeosOracleNftCollectionFloorPriceHuman: string
+    /** @example "0.16" */
+    nemeosOracleNftCollectionFloorPriceHumanShortRound: string
+    /** @example "507.45" */
+    nemeosOracleNftCollectionFloorPriceHumanUSD: string
+    /** @example "3880000000000000000" */
+    proposedUpfrontPaymentGivenPrices: string
+    /** @example "3.88" */
+    proposedUpfrontPaymentGivenPricesHuman: string
+    /** @example "3.88" */
+    proposedUpfrontPaymentGivenPricesHumanShortRound: string
+    /** @example "12305.61" */
+    proposedUpfrontPaymentGivenPricesHumanUSD: string
+    /** @example "4000000000000000000" */
+    openSeaNftCollectionFloorPrice: string
+    /** @example "4" */
+    openSeaNftCollectionFloorPriceHuman: string
+    /** @example "4" */
+    openSeaNftCollectionFloorPriceHumanShortRound: string
+    /** @example "12686.2" */
+    openSeaNftCollectionFloorPriceHumanUSD: string
+    /** @example "3171.55" */
+    exchangeRateToUSD: string
+    /** @example "120000000000000000" */
+    remainingToPayPrice: string
+    /** @example "0.12" */
+    remainingToPayPriceHuman: string
+    /** @example "0.12" */
+    remainingToPayPriceHumanShortRound: string
+    /** @example "380.59" */
+    remainingToPayPriceHumanUSD: string
+    /** @example "121464000000000000" */
+    remainingToPayPriceWithInterests: string
+    /** @example "0.121464" */
+    remainingToPayPriceWithInterestsHuman: string
+    /** @example "0.121" */
+    remainingToPayPriceWithInterestsHumanShortRound: string
+    /** @example "385.23" */
+    remainingToPayPriceWithInterestsHumanUSD: string
+    /** @example "1464000000000000" */
+    interestsToPay: string
+    /** @example "0.001464" */
+    interestsToPayHuman: string
+    /** @example "0.001" */
+    interestsToPayHumanShortRound: string
+    /** @example "4.64" */
+    interestsToPayHumanUSD: string
+    /** @example "4001464000000000000" */
+    totalLoanPrice: string
+    /** @example "4.001464" */
+    totalLoanPriceHuman: string
+    /** @example "4.001" */
+    totalLoanPriceHumanShortRound: string
+    /** @example "12690.84" */
+    totalLoanPriceHumanUSD: string
+    /** @example 3 */
+    numberOfInstallments: number
+    paySchedule: Array<{
+      /** @example "3880000000000000000" */
+      toPay: string
+      /** @example "3.88" */
+      toPayHuman: string
+      /** @example "3.88" */
+      toPayHumanShortRound: string
+      /** @example "12305.61" */
+      toPayHumanUSD: string
+      /** @example "1721947310346" */
+      unixTimestampMs: string
+      /** @example "Friday, July 26" */
+      dateTimeHuman: string
+      /** @example "2024-07-25T22:41:50.346Z" */
+      dateTimeJSON: string
+    }>
+  }
+  nftPoolLiveData: {
+    /** @example "0x3a668917C167dfa823b2816e782704444503078D" */
+    nftPoolAddress: string
+    /** @example "25" */
+    minimalDepositPercent: string
+    /** @example "25" */
+    minimalDepositPercentHuman: string
+    /** @example "7" */
+    yearlyInterestPercent: string
+    /** @example "7" */
+    yearlyInterestPercentHuman: string
+    /** @example "5.6000000000000005" */
+    yearlyLiquidityProviderProfitsEstimationPercent: string
+    /** @example "5.6" */
+    yearlyLiquidityProviderProfitsEstimationPercentHuman: string
+    /** @example "309586878710840000" */
+    availableLiquidity: string
+    /** @example "0.30958687871084" */
+    availableLiquidityHuman: string
+    /** @example "0.31" */
+    availableLiquidityHumanShortRound: string
+    /** @example "981.87" */
+    availableLiquidityHumanUSD: string
+    /** @example "0" */
+    liquidityLockedInLoans: string
+    /** @example "0" */
+    liquidityLockedInLoansHuman: string
+    /** @example "0" */
+    liquidityLockedInLoansHumanShortRound: string
+    /** @example "0" */
+    liquidityLockedInLoansHumanUSD: string
+    /** @example "309586878710840000" */
+    totalValueLocked: string
+    /** @example "0.30958687871084" */
+    totalValueLockedHuman: string
+    /** @example "0.31" */
+    totalValueLockedHumanShortRound: string
+    /** @example "981.87" */
+    totalValueLockedHumanUSD: string
+    /** @example "3650" */
+    maxYearlyLoanRate: string
+    /** @example "43200" */
+    vestingTimePerBasisPoint: string
+    /** @example 0 */
+    currentOngoingLoansCount: number
+    /** @example 3 */
+    allTimeLoansCount: number
+  }
 }
 
 export type NftStartLoanBuyOpenSeaData = {
@@ -163,6 +346,131 @@ export type NftStartLoanBuyOpenSeaData = {
      */
     value: string
     gasLimit: number
+  }
+}
+
+//
+// Nemeos Pool DirectMint mode
+//
+
+export type NftLivePriceDirectMintData = {
+  nftFullLivePriceData: {
+    /** @example "100000000000000000" */
+    mintPrice: string
+    /** @example "0.1" */
+    mintPriceHuman: string
+    /** @example "0.1" */
+    mintPriceHumanShortRound: string
+    /** @example "316.55" */
+    mintPriceHumanUSD: string
+    /** @example "25000000000000000" */
+    proposedUpfrontPaymentGivenPrices: string
+    /** @example "0.025" */
+    proposedUpfrontPaymentGivenPricesHuman: string
+    /** @example "0.025" */
+    proposedUpfrontPaymentGivenPricesHumanShortRound: string
+    /** @example "79.14" */
+    proposedUpfrontPaymentGivenPricesHumanUSD: string
+    /** @example "3165.45" */
+    exchangeRateToUSD: string
+    /** @example "75000000000000000" */
+    remainingToPayPrice: string
+    /** @example "0.075" */
+    remainingToPayPriceHuman: string
+    /** @example "0.075" */
+    remainingToPayPriceHumanShortRound: string
+    /** @example "237.41" */
+    remainingToPayPriceHumanUSD: string
+    /** @example "76372500000000000" */
+    remainingToPayPriceWithInterests: string
+    /** @example "0.0763725" */
+    remainingToPayPriceWithInterestsHuman: string
+    /** @example "0.076" */
+    remainingToPayPriceWithInterestsHumanShortRound: string
+    /** @example "241.75" */
+    remainingToPayPriceWithInterestsHumanUSD: string
+    /** @example "1372500000000000" */
+    interestsToPay: string
+    /** @example "0.0013725" */
+    interestsToPayHuman: string
+    /** @example "0.001" */
+    interestsToPayHumanShortRound: string
+    /** @example "4.34" */
+    interestsToPayHumanUSD: string
+    /** @example "101372500000000000" */
+    totalLoanPrice: string
+    /** @example "0.1013725" */
+    totalLoanPriceHuman: string
+    /** @example "0.101" */
+    totalLoanPriceHumanShortRound: string
+    /** @example "320.89" */
+    totalLoanPriceHumanUSD: string
+    /** @example 3 */
+    numberOfInstallments: number
+    paySchedule: Array<{
+      /** @example "25000000000000000" */
+      toPay: string
+      /** @example "0.025" */
+      toPayHuman: string
+      /** @example "0.025" */
+      toPayHumanShortRound: string
+      /** @example "79.14" */
+      toPayHumanUSD: string
+      /** @example "1721946366176" */
+      unixTimestampMs: string
+      /** @example "Friday, July 26" */
+      dateTimeHuman: string
+      /** @example "2024-07-25T22:26:06.176Z" */
+      dateTimeJSON: string
+    }>
+  }
+  nftPoolLiveData: {
+    /** @example "0xf4180C986Aec6f8fAdc6eFe4A0eC237c819AC074" */
+    nftPoolAddress: string
+    /** @example "25" */
+    minimalDepositPercent: string
+    /** @example "25" */
+    minimalDepositPercentHuman: string
+    /** @example "10" */
+    yearlyInterestPercent: string
+    /** @example "10" */
+    yearlyInterestPercentHuman: string
+    /** @example "8" */
+    yearlyLiquidityProviderProfitsEstimationPercent: string
+    /** @example "8" */
+    yearlyLiquidityProviderProfitsEstimationPercentHuman: string
+    /** @example "100000000000000000" */
+    availableLiquidity: string
+    /** @example "0.1" */
+    availableLiquidityHuman: string
+    /** @example "0.1" */
+    availableLiquidityHumanShortRound: string
+    /** @example "316.55" */
+    availableLiquidityHumanUSD: string
+    /** @example "0" */
+    liquidityLockedInLoans: string
+    /** @example "0" */
+    liquidityLockedInLoansHuman: string
+    /** @example "0" */
+    liquidityLockedInLoansHumanShortRound: string
+    /** @example "0" */
+    liquidityLockedInLoansHumanUSD: string
+    /** @example "100000000000000000" */
+    totalValueLocked: string
+    /** @example "0.1" */
+    totalValueLockedHuman: string
+    /** @example "0.1" */
+    totalValueLockedHumanShortRound: string
+    /** @example "316.55" */
+    totalValueLockedHumanUSD: string
+    /** @example "3650" */
+    maxYearlyLoanRate: string
+    /** @example "43200" */
+    vestingTimePerBasisPoint: string
+    /** @example 0 */
+    currentOngoingLoansCount: number
+    /** @example 0 */
+    allTimeLoansCount: number
   }
 }
 

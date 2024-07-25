@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { NemeosBackendClient } from '../NemeosBackendClient.js'
+import { NemeosBackendClient, NftLivePriceBuyOpenSeaData } from '../NemeosBackendClient.js'
 import { NemeosPoolClient } from './NemeosPoolClient.js'
 import { getFeeOverrides, NemeosSDKError } from '../utils.js'
 import { NemeosPoolMode } from '../constants.js'
@@ -7,6 +7,23 @@ import { NemeosPoolMode } from '../constants.js'
 export class NemeosPoolBuyOpenSeaClient extends NemeosPoolClient {
   constructor(signer: ethers.Signer, enableLogging: boolean, nftCollectionAddress: string, nemeosPoolAddress: string) {
     super(signer, enableLogging, nftCollectionAddress, nemeosPoolAddress, NemeosPoolMode.BuyOpenSea)
+  }
+
+  public async previewLoan(nftId: number, loanDurationDays: number): Promise<NftLivePriceBuyOpenSeaData> {
+    if (this.enableLogging) {
+      console.log(
+        `[nemeos][previewLoan_BuyOpenSea] Previewing loan for ` +
+          `nftCollectionAddress=${this.nftCollectionAddress}, nftId=${nftId}, loanDurationDays=${loanDurationDays}`,
+      )
+    }
+
+    const previewLoanData = await NemeosBackendClient.fetchLivePriceBuyOpenSeaData(this.nftCollectionAddress, nftId, loanDurationDays)
+
+    if (this.enableLogging) {
+      console.log('[nemeos][previewLoan_BuyOpenSea] Preview loan data:', previewLoanData)
+    }
+
+    return previewLoanData
   }
 
   public async startLoan(nftId: number, loanDurationDays: number): Promise<ethers.ContractTransactionReceipt> {

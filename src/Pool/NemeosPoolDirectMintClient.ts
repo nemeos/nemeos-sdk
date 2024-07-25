@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { NemeosBackendClient } from '../NemeosBackendClient.js'
+import { NemeosBackendClient, NftLivePriceDirectMintData } from '../NemeosBackendClient.js'
 import { NemeosPoolClient } from './NemeosPoolClient.js'
 import { getFeeOverrides, NemeosSDKError } from '../utils.js'
 import { NemeosPoolMode } from '../constants.js'
@@ -9,20 +9,42 @@ export class NemeosPoolDirectMintClient extends NemeosPoolClient {
     super(signer, enableLogging, nftCollectionAddress, nemeosPoolAddress, NemeosPoolMode.DirectMint)
   }
 
-  public async startLoan(nftId: number, loanDurationDays: number, whitelistProof?: string[]): Promise<ethers.ContractTransactionReceipt> {
+  public async isWhitelistedAddress(whitelistProof: string[]): Promise<boolean> {
+    const borrowerAddress = await this.signer.getAddress()
+    const isWhitelisted = await this.poolContract.isWhitelistedAddress(borrowerAddress, whitelistProof)
+    return isWhitelisted
+  }
+
+  public async previewLoan(loanDurationDays: number): Promise<NftLivePriceDirectMintData> {
+    if (this.enableLogging) {
+      console.log(
+        `[nemeos][previewLoan_DirectMint] Previewing loan for ` +
+          `nftCollectionAddress=${this.nftCollectionAddress}, loanDurationDays=${loanDurationDays}`,
+      )
+    }
+
+    const previewLoanData = await NemeosBackendClient.fetchLivePriceDirectMintData(this.nftCollectionAddress, loanDurationDays)
+
+    if (this.enableLogging) {
+      console.log('[nemeos][previewLoan_DirectMint] Preview loan data:', previewLoanData)
+    }
+
+    return previewLoanData
+  }
+
+  public async startLoan(loanDurationDays: number, whitelistProof?: string[]): Promise<ethers.ContractTransactionReceipt> {
     const borrowerAddress = await this.signer.getAddress()
 
     if (this.enableLogging) {
       console.log(
         `[nemeos][startLoan_DirectMint] Starting loan from borrowerAddress=${borrowerAddress} for ` +
-          `nftCollectionAddress=${this.nftCollectionAddress}, nftId=${nftId}, loanDurationDays=${loanDurationDays}`,
+          `nftCollectionAddress=${this.nftCollectionAddress}, loanDurationDays=${loanDurationDays}`,
       )
     }
 
     const startLoanData = await NemeosBackendClient.fetchStartLoanDirectMintData(
       borrowerAddress,
       this.nftCollectionAddress,
-      nftId,
       loanDurationDays,
       whitelistProof,
     )

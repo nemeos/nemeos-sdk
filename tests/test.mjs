@@ -3,6 +3,9 @@
 import * as ethers from 'ethers'
 import { NemeosSDK } from '../dist/index.js'
 
+import { config } from 'dotenv'
+config()
+
 async function main() {
   if (!process.env.WALLET_PRIVATE_KEY || !process.env.INFURA_ENDPOINT_WITH_API_KEY) {
     const missingVariables = Object.entries({
@@ -46,6 +49,8 @@ async function main() {
 
   const nemeosPoolBuyOpenSeaAddress = '0x812db15b8Bb43dBA89042eA8b919740C23aD48a3'
   const nftCollectionCyberKongzAddress = '0x15cd1cfCd48C06cfC44D433D66C7a9fE06b2C2c3'
+  const nftId1 = 231
+  const loanDurationDays1 = 90
 
   const nemeosPoolBuyOpenSeaClient = nemeosSdk.getNemeosPoolClient({
     nemeosPoolAddress: nemeosPoolBuyOpenSeaAddress,
@@ -53,20 +58,24 @@ async function main() {
     nemeosPoolMode: NemeosSDK.NemeosPoolMode.BuyOpenSea,
   })
 
-  await nemeosPoolBuyOpenSeaClient.startLoan(224, 90)
+  const loan1 = await nemeosPoolBuyOpenSeaClient.previewLoan(nftId1, loanDurationDays1)
+  console.dir(loan1, { depth: null })
+  await nemeosPoolBuyOpenSeaClient.startLoan(nftId1, loanDurationDays1)
   // await new Promise(res => setTimeout(res, 10_000))
-  await nemeosPoolBuyOpenSeaClient.retrieveLoan(224)
-  await nemeosPoolBuyOpenSeaClient.payNextLoanStep(224)
-  await nemeosPoolBuyOpenSeaClient.retrieveLoan(224)
-  await nemeosPoolBuyOpenSeaClient.payNextLoanStep(224)
-  await nemeosPoolBuyOpenSeaClient.retrieveLoan(224)
+  await nemeosPoolBuyOpenSeaClient.retrieveLoan(nftId1)
+  await nemeosPoolBuyOpenSeaClient.payNextLoanStep(nftId1)
+  await nemeosPoolBuyOpenSeaClient.retrieveLoan(nftId1)
+  await nemeosPoolBuyOpenSeaClient.payNextLoanStep(nftId1)
+  await nemeosPoolBuyOpenSeaClient.retrieveLoan(nftId1)
 
   //
   // NemeosPoolDirectMintClient
   //
 
-  const nemeosPoolDirectMintAddress = '0x0000000000000000000000000000000000000000'
+  const nemeosPoolDirectMintAddress = '0x0000000000000000000000000000000000000000' // FIXME: Update with the actual address
   const nftCollectionWaldosAddress = '0x53ca73EE747ceD027c677feCCC13b885f31Ee4dF'
+  const nftId2 = 224
+  const loanDurationDays2 = 61
 
   const nemeosPoolDirectMintClient = nemeosSdk.getNemeosPoolClient({
     nemeosPoolAddress: nemeosPoolDirectMintAddress,
@@ -74,13 +83,16 @@ async function main() {
     nemeosPoolMode: NemeosSDK.NemeosPoolMode.DirectMint,
   })
 
-  await nemeosPoolDirectMintClient.startLoan(224, 90)
+  const loan2 = await nemeosPoolDirectMintClient.previewLoan(loanDurationDays2)
+  console.dir(loan2, { depth: null })
+  await nemeosPoolDirectMintClient.isWhitelistedAddress(['0x0'])
+  await nemeosPoolDirectMintClient.startLoan(nftId2, ['0x0'])
   // await new Promise(res => setTimeout(res, 10_000))
-  await nemeosPoolDirectMintClient.retrieveLoan(224)
-  await nemeosPoolDirectMintClient.payNextLoanStep(224)
-  await nemeosPoolDirectMintClient.retrieveLoan(224)
-  await nemeosPoolDirectMintClient.payNextLoanStep(224)
-  await nemeosPoolDirectMintClient.retrieveLoan(224)
+  await nemeosPoolDirectMintClient.retrieveLoan(nftId2)
+  await nemeosPoolDirectMintClient.payNextLoanStep(nftId2)
+  await nemeosPoolDirectMintClient.retrieveLoan(nftId2)
+  await nemeosPoolDirectMintClient.payNextLoanStep(nftId2)
+  await nemeosPoolDirectMintClient.retrieveLoan(nftId2)
 }
 
 main().catch(console.error)
