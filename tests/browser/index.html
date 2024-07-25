@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Nemeos SDK Test</h1>
+
+    <div>
+      Is wallet connected?
+      <span id="isConnected">---</span>
+    </div>
+
+    <div>
+      <button id="connectWallet">Connect wallet</button>
+    </div>
+    <div>
+      <button id="startLoan">Start Loan for nftId 224 and 90 days</button>
+    </div>
+    <div>
+      <button id="retrieveLoan">Retrieve Loan for nftId 224</button>
+    </div>
+    <div>
+      <button id="payNextLoanStep">Pay Next Loan Step for nftId 224</button>
+    </div>
+
+    <script type="module" src="./script.ts"></script>
+  </body>
+</html>

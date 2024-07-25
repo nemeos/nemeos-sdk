@@ -1,6 +1,6 @@
 {
   "name": "nemeos-sdk",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "description": "Nemeos SDK to facilitate integration with the Nemeos platform",
   "license": "MIT",
@@ -40,6 +40,6 @@
     "ofetch": "^1.3.4"
   },
   "devDependencies": {
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   }
 }

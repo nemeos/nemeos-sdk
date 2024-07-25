@@ -236,17 +236,7 @@ pnpm i --global parcel
 ```
 
 ```bash
-# Using ethers.js
-parcel tests/testEthersJs.html
-
-# Using window.ethereum
-parcel tests/testWindowEthereum.html
-```
-
-Then open a server, for example with [`serve`](https://github.com/vercel/serve)
-
-```bash
-serve dist/ -p 5555
+parcel tests/browser/index.html
 ```
 
 ## License
