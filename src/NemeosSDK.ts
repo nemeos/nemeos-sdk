@@ -1,9 +1,9 @@
 import * as ethers from 'ethers'
 import { NemeosCustomerClient } from './Customer/NemeosCustomerClient.js'
-import { NemeosPoolMode } from './Pool/NemeosPoolClient.js'
 import { NemeosPoolBuyOpenSeaClient } from './Pool/NemeosPoolBuyOpenSeaClient.js'
 import { NemeosPoolDirectMintClient } from './Pool/NemeosPoolDirectMintClient.js'
 import { assertValidHexAddress } from './utils.js'
+import { NemeosPoolMode } from './constants.js'
 
 export const getBrowserProvider = (windowEthereum: ethers.Eip1193Provider) => {
   return new ethers.BrowserProvider(windowEthereum)

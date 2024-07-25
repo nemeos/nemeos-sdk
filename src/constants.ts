@@ -1,4 +1,7 @@
-import { NemeosPoolMode } from './Pool/NemeosPoolClient.js'
+export enum NemeosPoolMode {
+  BuyOpenSea = 'BuyOpenSea',
+  DirectMint = 'DirectMint',
+}
 
 export const NEMEOS_ABI = {
   POOL: {

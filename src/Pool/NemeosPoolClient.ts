@@ -1,11 +1,7 @@
 import { ethers } from 'ethers'
 import { NEMEOS_ABI } from '../constants.js'
 import { NemeosSDKError } from '../utils.js'
-
-export enum NemeosPoolMode {
-  BuyOpenSea = 'BuyOpenSea',
-  DirectMint = 'DirectMint',
-}
+import { NemeosPoolMode } from '../constants.js'
 
 export abstract class NemeosPoolClient {
   protected readonly poolContract: ethers.Contract

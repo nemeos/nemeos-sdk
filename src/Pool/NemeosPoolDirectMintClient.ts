@@ -1,7 +1,8 @@
 import { ethers } from 'ethers'
 import { NemeosBackendClient } from '../NemeosBackendClient.js'
-import { NemeosPoolClient, NemeosPoolMode } from './NemeosPoolClient.js'
+import { NemeosPoolClient } from './NemeosPoolClient.js'
 import { getFeeOverrides, NemeosSDKError } from '../utils.js'
+import { NemeosPoolMode } from '../constants.js'
 
 export class NemeosPoolDirectMintClient extends NemeosPoolClient {
   constructor(signer: ethers.Signer, enableLogging: boolean, nftCollectionAddress: string, nemeosPoolAddress: string) {
