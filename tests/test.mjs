@@ -41,20 +41,46 @@ async function main() {
   console.log('customerData after email registration:', customerDataAfterEmailRegistration)
 
   //
-  // NemeosPoolClient
+  // NemeosPoolBuyOpenSeaClient
   //
 
-  const nemeosPoolAddress = '0x812db15b8Bb43dBA89042eA8b919740C23aD48a3'
-  const cyberKongzAddress = '0x15cd1cfCd48C06cfC44D433D66C7a9fE06b2C2c3'
+  const nemeosPoolBuyOpenSeaAddress = '0x812db15b8Bb43dBA89042eA8b919740C23aD48a3'
+  const nftCollectionCyberKongzAddress = '0x15cd1cfCd48C06cfC44D433D66C7a9fE06b2C2c3'
 
-  const nemeosPoolClient = nemeosSdk.getNemeosPoolClient({
-    nemeosPoolAddress,
-    nftCollectionAddress: cyberKongzAddress,
+  const nemeosPoolBuyOpenSeaClient = nemeosSdk.getNemeosPoolClient({
+    nemeosPoolAddress: nemeosPoolBuyOpenSeaAddress,
+    nftCollectionAddress: nftCollectionCyberKongzAddress,
+    nemeosPoolMode: NemeosSDK.NemeosPoolMode.BuyOpenSea,
   })
 
-  // await nemeosPool.startLoan(224, 90)
-  await nemeosPoolClient.retrieveLoan(224)
-  // await nemeosPool.payNextLoanStep(224)
+  await nemeosPoolBuyOpenSeaClient.startLoan(224, 90)
+  // await new Promise(res => setTimeout(res, 10_000))
+  await nemeosPoolBuyOpenSeaClient.retrieveLoan(224)
+  await nemeosPoolBuyOpenSeaClient.payNextLoanStep(224)
+  await nemeosPoolBuyOpenSeaClient.retrieveLoan(224)
+  await nemeosPoolBuyOpenSeaClient.payNextLoanStep(224)
+  await nemeosPoolBuyOpenSeaClient.retrieveLoan(224)
+
+  //
+  // NemeosPoolDirectMintClient
+  //
+
+  const nemeosPoolDirectMintAddress = '0x0000000000000000000000000000000000000000'
+  const nftCollectionWaldosAddress = '0x53ca73EE747ceD027c677feCCC13b885f31Ee4dF'
+
+  const nemeosPoolDirectMintClient = nemeosSdk.getNemeosPoolClient({
+    nemeosPoolAddress: nemeosPoolDirectMintAddress,
+    nftCollectionAddress: nftCollectionWaldosAddress,
+    nemeosPoolMode: NemeosSDK.NemeosPoolMode.DirectMint,
+  })
+
+  await nemeosPoolDirectMintClient.startLoan(224, 90)
+  // await new Promise(res => setTimeout(res, 10_000))
+  await nemeosPoolDirectMintClient.retrieveLoan(224)
+  await nemeosPoolDirectMintClient.payNextLoanStep(224)
+  await nemeosPoolDirectMintClient.retrieveLoan(224)
+  await nemeosPoolDirectMintClient.payNextLoanStep(224)
+  await nemeosPoolDirectMintClient.retrieveLoan(224)
 }
 
 main().catch(console.error)

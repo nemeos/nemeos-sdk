@@ -4,6 +4,7 @@ import { NemeosSDKError } from '../utils.js'
 
 export enum NemeosPoolMode {
   BuyOpenSea = 'BuyOpenSea',
+  DirectMint = 'DirectMint',
 }
 
 export abstract class NemeosPoolClient {

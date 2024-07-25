@@ -68,6 +68,25 @@ export class NemeosBackendClient {
       },
     ).catch(extractHttpErrorMessageThenThrow)
   }
+
+  public static async fetchStartLoanDirectMintData(
+    borrowerAddress: string,
+    nftCollectionAddress: string,
+    nftId: number,
+    loanDurationDays: number,
+    whitelistProof?: string[],
+  ): Promise<NftStartLoanDirectMintData> {
+    return NemeosBackendClient.ofetchClient<NftStartLoanDirectMintData>(
+      `/nftCollections/${nftCollectionAddress}/protocolVariant/directMint/nftId/${nftId}/startLoanData`,
+      {
+        query: {
+          loanDurationDays,
+          customerWalletAddress: borrowerAddress,
+          whitelistProof,
+        },
+      },
+    ).catch(extractHttpErrorMessageThenThrow)
+  }
 }
 
 /**
@@ -135,6 +154,70 @@ export type NftStartLoanBuyOpenSeaData = {
     orderExtraData: string
     /** Signature of the oracle */
     oracleSignature: string
+  }
+  customerBuyNftOverrides: {
+    /**
+     * Upfront payment of the loan that will be paid by the customer to the protocol smart contract
+     *
+     * `proposedUpfrontPaymentGivenPrices`
+     */
+    value: string
+    gasLimit: number
+  }
+}
+
+export type NftStartLoanDirectMintData = {
+  customerBuyNftParameters: {
+    /** ID of the NFT */
+    tokenId: string
+    /**
+     * Price of the NFT on OpenSea in token units
+     *
+     * `openSeaNftPrice`
+     */
+    priceOfNFT: string
+    /**
+     * Floor price of the NFT given by Nemeos oracle algorithm in token units
+     *
+     * `nemeosOracleNftCollectionFloorPrice`
+     */
+    nftFloorPrice: string
+    /**
+     * Price of the NFT including the interest rate and protocol fees
+     *
+     * `totalLoanPrice`
+     *
+     * @example
+     * ```ts
+     * const totalLoanPrice = _remainingToPayPriceWithInterests.add(_proposedUpfrontPaymentGivenPrices)
+     * ```
+     */
+    priceOfNFTIncludingFees: string
+    /** Address of the crowdsale contract that will process the NFT payment */
+    crowdsaleContractAddress: string
+    /**
+     * Timestamp of the loan
+     *
+     * @example
+     * ```ts
+     * const _blockNumber = await _metamaskSigner.provider.getBlockNumber()
+     * const _block = await _metamaskSigner.provider.getBlock(_blockNumber)
+     * const loanTimestamp = _block.timestamp
+     *```
+     */
+    loanTimestamp: number
+    /**
+     * Duration of the loan in seconds
+     *
+     * `loanDurationDays * 24 * 60 * 60`
+     */
+    loanDurationInSeconds: number
+    /** Extra data of the order */
+    orderExtraData: string
+    /** Signature of the oracle */
+    oracleSignature: string
+    /** Array of proof elements for verification purposes */
+    proof: string[]
   }
   customerBuyNftOverrides: {
     /**

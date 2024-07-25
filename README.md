@@ -139,6 +139,7 @@ The Nemeos Pool Client is used to interact with Nemeos pools smart contracts on 
 const nemeosPoolClient = nemeosSdk.getNemeosPoolClient({
   nemeosPoolAddress: '0x812db15b8Bb43dBA89042eA8b919740C23aD48a3',
   nftCollectionAddress: '0x15cd1cfCd48C06cfC44D433D66C7a9fE06b2C2c3',
+  nemeosPoolMode: NemeosSDK.NemeosPoolMode.BuyOpenSea, // Can be `BuyOpenSea` or `DirectMint`
 })
 ```
 
