@@ -52,6 +52,7 @@ const wallet = new ethers.Wallet(process.env.WALLET_PRIVATE_KEY, provider)
 
 const nemeosSdk = new NemeosSDK(wallet, {
   enableLogging: true, // Enable logging to the console - Optional, default: `true`
+  nemeosBackendEnvironment: NemeosSDK.NemeosBackendEnvironment.Production, // Optional, default: `Production`
 })
 ```
 
@@ -68,6 +69,7 @@ const signer = await provider.getSigner()
 
 const nemeosSdk = new NemeosSDK(signer, {
   enableLogging: true, // Enable logging to the console - Optional, default: `true`
+  nemeosBackendEnvironment: NemeosSDK.NemeosBackendEnvironment.Production, // Optional, default: `Production`
 })
 ```
 
@@ -81,6 +83,7 @@ const signer = await provider.getSigner()
 
 const nemeosSdk = new NemeosSDK(signer, {
   enableLogging: true, // Enable logging to the console - Optional, default: `true`
+  nemeosBackendEnvironment: NemeosSDK.NemeosBackendEnvironment.Production, // Optional, default: `Production`
 })
 ```
 
@@ -148,7 +151,7 @@ const nemeosPoolClient = nemeosSdk.getNemeosPoolClient({
 ```ts
 try {
   // Preview loan for Nemeos Pool `BuyOpenSea` mode
-  const nftId = 231
+  const nftId = '231'
   const loanDurationDays = 61
   const loanData = await nemeosPoolBuyOpenSeaClient.previewLoan(nftId, loanDurationDays)
 
@@ -441,7 +444,7 @@ export type NftLivePriceDirectMintData = {
 ```ts
 try {
   // Start loan for Nemeos Pool `BuyOpenSea` mode
-  const nftId = 224
+  const nftId = '224'
   const loanDurationDays = 90
   const tx = await nemeosPoolBuyOpenSeaClient.startLoan(nftId, loanDurationDays)
 
@@ -460,7 +463,7 @@ try {
 #### Retrieve a loan
 
 ```ts
-const nftId = 224
+const nftId = '224'
 const loan = await nemeosPoolClient.retrieveLoan(nftId)
 ```
 
@@ -501,7 +504,7 @@ type Loan = {
 
 ```ts
 try {
-  const nftId = 224
+  const nftId = '224'
   const tx = await nemeosPoolClient.payNextLoanStep(nftId)
 
   console.log('Paying next loan step success! Transaction hash:', tx.hash)

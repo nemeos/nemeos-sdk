@@ -16,14 +16,20 @@ export class NemeosPoolDirectMintClient extends NemeosPoolClient {
   }
 
   public async previewLoan(loanDurationDays: number): Promise<NftLivePriceDirectMintData> {
+    const borrowerAddress = await this.signer.getAddress()
+
     if (this.enableLogging) {
       console.log(
         `[nemeos][previewLoan_DirectMint] Previewing loan for ` +
-          `nftCollectionAddress=${this.nftCollectionAddress}, loanDurationDays=${loanDurationDays}`,
+          `nftCollectionAddress=${this.nftCollectionAddress}, loanDurationDays=${loanDurationDays}, borrowerAddress=${borrowerAddress}`,
       )
     }
 
-    const previewLoanData = await NemeosBackendClient.fetchLivePriceDirectMintData(this.nftCollectionAddress, loanDurationDays)
+    const previewLoanData = await NemeosBackendClient.fetchLivePriceDirectMintData(
+      this.nftCollectionAddress,
+      loanDurationDays,
+      borrowerAddress,
+    )
 
     if (this.enableLogging) {
       console.log('[nemeos][previewLoan_DirectMint] Preview loan data:', previewLoanData)
@@ -43,9 +49,9 @@ export class NemeosPoolDirectMintClient extends NemeosPoolClient {
     }
 
     const startLoanData = await NemeosBackendClient.fetchStartLoanDirectMintData(
-      borrowerAddress,
       this.nftCollectionAddress,
       loanDurationDays,
+      borrowerAddress,
       whitelistProof,
     )
     const feeOverides = await getFeeOverrides(this.signer.provider!)

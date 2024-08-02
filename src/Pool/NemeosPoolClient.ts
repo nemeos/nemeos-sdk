@@ -17,7 +17,7 @@ export abstract class NemeosPoolClient {
     this.poolContract = new ethers.Contract(nemeosPoolAddress, nemeosPoolInterface, signer)
   }
 
-  public async retrieveLoan(nftId: number): Promise<Loan> {
+  public async retrieveLoan(nftId: string): Promise<Loan> {
     const borrowerAddress = await this.signer.getAddress()
 
     if (this.enableLogging) {
@@ -30,7 +30,7 @@ export abstract class NemeosPoolClient {
     return loan
   }
 
-  public async payNextLoanStep(nftId: number): Promise<ethers.ContractTransactionReceipt> {
+  public async payNextLoanStep(nftId: string): Promise<ethers.ContractTransactionReceipt> {
     const borrowerAddress = await this.signer.getAddress()
 
     if (this.enableLogging) {

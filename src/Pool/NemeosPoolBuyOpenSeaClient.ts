@@ -9,15 +9,22 @@ export class NemeosPoolBuyOpenSeaClient extends NemeosPoolClient {
     super(signer, enableLogging, nftCollectionAddress, nemeosPoolAddress, NemeosPoolMode.BuyOpenSea)
   }
 
-  public async previewLoan(nftId: number, loanDurationDays: number): Promise<NftLivePriceBuyOpenSeaData> {
+  public async previewLoan(nftId: string, loanDurationDays: number): Promise<NftLivePriceBuyOpenSeaData> {
+    const borrowerAddress = await this.signer.getAddress()
+
     if (this.enableLogging) {
       console.log(
         `[nemeos][previewLoan_BuyOpenSea] Previewing loan for ` +
-          `nftCollectionAddress=${this.nftCollectionAddress}, nftId=${nftId}, loanDurationDays=${loanDurationDays}`,
+          `nftCollectionAddress=${this.nftCollectionAddress}, nftId=${nftId}, loanDurationDays=${loanDurationDays}, borrowerAddress=${borrowerAddress}`,
       )
     }
 
-    const previewLoanData = await NemeosBackendClient.fetchLivePriceBuyOpenSeaData(this.nftCollectionAddress, nftId, loanDurationDays)
+    const previewLoanData = await NemeosBackendClient.fetchLivePriceBuyOpenSeaData(
+      this.nftCollectionAddress,
+      nftId,
+      loanDurationDays,
+      borrowerAddress,
+    )
 
     if (this.enableLogging) {
       console.log('[nemeos][previewLoan_BuyOpenSea] Preview loan data:', previewLoanData)
@@ -26,7 +33,7 @@ export class NemeosPoolBuyOpenSeaClient extends NemeosPoolClient {
     return previewLoanData
   }
 
-  public async startLoan(nftId: number, loanDurationDays: number): Promise<ethers.ContractTransactionReceipt> {
+  public async startLoan(nftId: string, loanDurationDays: number): Promise<ethers.ContractTransactionReceipt> {
     const borrowerAddress = await this.signer.getAddress()
 
     if (this.enableLogging) {
@@ -37,10 +44,10 @@ export class NemeosPoolBuyOpenSeaClient extends NemeosPoolClient {
     }
 
     const startLoanData = await NemeosBackendClient.fetchStartLoanBuyOpenSeaData(
-      borrowerAddress,
       this.nftCollectionAddress,
       nftId,
       loanDurationDays,
+      borrowerAddress,
     )
     const feeOverides = await getFeeOverrides(this.signer.provider!)
 

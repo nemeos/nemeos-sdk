@@ -4,6 +4,7 @@ import { NemeosPoolBuyOpenSeaClient } from './Pool/NemeosPoolBuyOpenSeaClient.js
 import { NemeosPoolDirectMintClient } from './Pool/NemeosPoolDirectMintClient.js'
 import { assertValidHexAddress } from './utils.js'
 import { NemeosPoolMode } from './constants.js'
+import { NemeosBackendClient, NemeosBackendEnvironment } from './NemeosBackendClient.js'
 
 export const getBrowserProvider = (windowEthereum: ethers.Eip1193Provider) => {
   return new ethers.BrowserProvider(windowEthereum)
@@ -17,9 +18,12 @@ export class NemeosSDK {
     options?: {
       /** Enable logging to the console - Optional, default: `true` */
       enableLogging?: boolean
+      /** Nemeos Backend environment - Optional, default: `NemeosBackendEnvironment.Production` */
+      nemeosBackendEnvironment?: NemeosBackendEnvironment
     },
   ) {
     this.enableLogging = options?.enableLogging === undefined ? true : options.enableLogging
+    NemeosBackendClient.setEnvironment(options?.nemeosBackendEnvironment || NemeosBackendEnvironment.Production)
   }
 
   public getNemeosCustomerClient(): NemeosCustomerClient {
@@ -51,4 +55,5 @@ export class NemeosSDK {
   }
 
   public static NemeosPoolMode = NemeosPoolMode
+  public static NemeosBackendEnvironment = NemeosBackendEnvironment
 }

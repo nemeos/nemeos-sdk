@@ -7,15 +7,39 @@ const extractHttpErrorMessageThenThrow = (error: any) => {
   throw new NemeosSDKError(extractHttpErrorMessage(error))
 }
 
+export enum NemeosBackendEnvironment {
+  Development = 'development',
+  Preprod = 'preprod',
+  Production = 'production',
+}
+
 export class NemeosBackendClient {
-  private static readonly ofetchClient = ofetch.create({
+  private static ofetchClient = ofetch.create({
     baseURL:
-      process.env.NODE_ENV === 'development'
+      process?.env?.NODE_ENV === NemeosBackendEnvironment.Development
         ? 'http://localhost:8000'
-        : process.env.NODE_ENV === 'preprod'
+        : process?.env?.NODE_ENV === NemeosBackendEnvironment.Preprod
         ? 'https://testnet-api.nemeos.finance'
         : 'https://api.nemeos.finance',
   })
+
+  public static setEnvironment(env: NemeosBackendEnvironment) {
+    const baseURL =
+      env === NemeosBackendEnvironment.Development
+        ? 'http://localhost:8000'
+        : env === NemeosBackendEnvironment.Preprod
+        ? 'https://testnet-api.nemeos.finance'
+        : 'https://api.nemeos.finance'
+
+    if (env !== NemeosBackendEnvironment.Production) {
+      console.log('[nemeos] NemeosBackendClient will use API at', baseURL)
+    }
+    NemeosBackendClient.ofetchClient = ofetch.create({ baseURL })
+  }
+
+  //
+  // ------------------------------
+  //
 
   public static async generateLoginSignature(metamaskSigner: ethers.Signer): Promise<NemeosLoginSignature> {
     const message = `Action: check_ownership ; Date: ${new Date().toISOString()}`
@@ -62,24 +86,26 @@ export class NemeosBackendClient {
   //
   public static async fetchLivePriceBuyOpenSeaData(
     nftCollectionAddress: string,
-    nftId: number,
+    nftId: string,
     loanDurationDays: number,
+    borrowerAddress: string,
   ): Promise<NftLivePriceBuyOpenSeaData> {
     return NemeosBackendClient.ofetchClient<NftLivePriceBuyOpenSeaData>(
       `/nftCollections/${nftCollectionAddress}/protocolVariant/buyOpenSea/nftId/${nftId}/livePriceData`,
       {
         query: {
           loanDurationDays,
+          customerWalletAddress: borrowerAddress,
         },
       },
     ).catch(extractHttpErrorMessageThenThrow)
   }
 
   public static async fetchStartLoanBuyOpenSeaData(
-    borrowerAddress: string,
     nftCollectionAddress: string,
-    nftId: number,
+    nftId: string,
     loanDurationDays: number,
+    borrowerAddress: string,
   ): Promise<NftStartLoanBuyOpenSeaData> {
     return NemeosBackendClient.ofetchClient<NftStartLoanBuyOpenSeaData>(
       `/nftCollections/${nftCollectionAddress}/protocolVariant/buyOpenSea/nftId/${nftId}/startLoanData`,
@@ -99,21 +125,23 @@ export class NemeosBackendClient {
   public static async fetchLivePriceDirectMintData(
     nftCollectionAddress: string,
     loanDurationDays: number,
+    borrowerAddress: string,
   ): Promise<NftLivePriceDirectMintData> {
     return NemeosBackendClient.ofetchClient<NftLivePriceDirectMintData>(
       `/nftCollections/${nftCollectionAddress}/protocolVariant/directMint/livePriceData`,
       {
         query: {
           loanDurationDays,
+          customerWalletAddress: borrowerAddress,
         },
       },
     ).catch(extractHttpErrorMessageThenThrow)
   }
 
   public static async fetchStartLoanDirectMintData(
-    borrowerAddress: string,
     nftCollectionAddress: string,
     loanDurationDays: number,
+    borrowerAddress: string,
     whitelistProof?: string[],
   ): Promise<NftStartLoanDirectMintData> {
     return NemeosBackendClient.ofetchClient<NftStartLoanDirectMintData>(
@@ -355,6 +383,8 @@ export type NftStartLoanBuyOpenSeaData = {
 
 export type NftLivePriceDirectMintData = {
   nftFullLivePriceData: {
+    /** @example "231" */
+    nextMintNftId: string
     /** @example "100000000000000000" */
     mintPrice: string
     /** @example "0.1" */
