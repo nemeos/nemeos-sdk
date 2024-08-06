@@ -146,6 +146,15 @@ const nemeosPoolClient = nemeosSdk.getNemeosPoolClient({
 })
 ```
 
+#### Get Pool Balance
+
+Retrieve the current balance of the pool smart contract in native token in wei (if balance is 1 ETH, will return `1000000000000000000`).
+
+```ts
+const poolBalance = await nemeosPoolClient.getPoolBalance()
+console.log('Pool Balance:', poolBalance)
+```
+
 ### Preview a loan
 
 ```ts

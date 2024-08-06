@@ -60,19 +60,28 @@ async function main() {
     nemeosPoolMode: NemeosSDK.NemeosPoolMode.BuyOpenSea,
   })
 
+  const poolBalance = await nemeosPoolBuyOpenSeaClient.getPoolBalance()
+  console.log('Pool balance:', poolBalance)
+  console.log('Calling previewLoan...')
   const loan1 = await nemeosPoolBuyOpenSeaClient.previewLoan(nftId1, loanDurationDays1)
   console.dir(loan1, { depth: null })
+  console.log('Calling startLoan...')
   await nemeosPoolBuyOpenSeaClient.startLoan(nftId1, loanDurationDays1)
   await new Promise(res => setTimeout(res, 10_000))
 
+  console.log('Calling retrieveLoan 1...')
   await nemeosPoolBuyOpenSeaClient.retrieveLoan(nftId1)
+  console.log('Calling payNextLoanStep 1...')
   await nemeosPoolBuyOpenSeaClient.payNextLoanStep(nftId1)
   await new Promise(res => setTimeout(res, 3_000))
 
+  console.log('Calling retrieveLoan 2...')
   await nemeosPoolBuyOpenSeaClient.retrieveLoan(nftId1)
+  console.log('Calling payNextLoanStep 2...')
   await nemeosPoolBuyOpenSeaClient.payNextLoanStep(nftId1)
   await new Promise(res => setTimeout(res, 3_000))
 
+  console.log('Calling retrieveLoan 3...')
   await nemeosPoolBuyOpenSeaClient.retrieveLoan(nftId1)
 
   //

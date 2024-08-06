@@ -17,6 +17,11 @@ export abstract class NemeosPoolClient {
     this.poolContract = new ethers.Contract(nemeosPoolAddress, nemeosPoolInterface, signer)
   }
 
+  public async getPoolBalance(): Promise<string> {
+    const balance = await this.signer.provider!.getBalance(this.nemeosPoolAddress)
+    return balance.toString()
+  }
+
   public async retrieveLoan(nftId: string): Promise<Loan> {
     const borrowerAddress = await this.signer.getAddress()
 
